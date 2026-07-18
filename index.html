@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESG AI Practice Lab · 提示词方法与案例库</title>
+<meta name="description" content="面向ESG报告编制方与ESG分析方的AI提示词方法与实战案例库，覆盖Excel、PPT、Word。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F3EC;
+    --paper-alt:#EEEADE;
+    --ink:#1C2B22;
+    --ink-soft:#51604F;
+    --line:#D9D2C0;
+    --e:#3B6B4C;
+    --s:#2C5872;
+    --g:#96662A;
+    --signal:#B84324;
+    --code-bg:#1C2B22;
+    --code-text:#E8E4D6;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Source Serif 4',serif;
+    font-weight:600;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;}
+  :focus-visible{outline:2px solid var(--signal); outline-offset:3px;}
+
+  .wrap{max-width:1120px; margin:0 auto; padding:0 28px;}
+
+  /* ---------- header ---------- */
+  header.site{
+    padding:20px 28px;
+    display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px solid var(--line);
+  }
+  .brand{font-family:'IBM Plex Mono',monospace; font-size:14px; letter-spacing:0.04em;}
+  .brand b{color:var(--e);}
+  nav.site a{
+    font-size:13px; margin-left:22px; text-decoration:none; color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace;
+  }
+  nav.site a:hover{color:var(--ink);}
+
+  /* ---------- hero ---------- */
+  .hero{padding:72px 0 40px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--ink-soft); margin-bottom:18px; display:block;
+  }
+  .hero h1{font-size:44px; max-width:820px;}
+  .hero p.lede{
+    max-width:640px; margin-top:18px; font-size:17px; color:var(--ink-soft);
+  }
+
+  .paths{
+    display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:44px;
+  }
+  .path-card{
+    border:1px solid var(--line); background:var(--paper-alt);
+    padding:26px; border-radius:var(--radius);
+    border-left:4px solid var(--e);
+    text-decoration:none; color:var(--ink);
+    display:block;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .path-card.demand{border-left-color:var(--s);}
+  @media (prefers-reduced-motion:no-preference){
+    .path-card:hover{transform:translateY(-2px); box-shadow:0 6px 20px rgba(28,43,34,0.08);}
+  }
+  .path-card .tag{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--e);
+  }
+  .path-card.demand .tag{color:var(--s);}
+  .path-card h3{font-size:21px; margin-top:8px;}
+  .path-card p{font-size:14px; color:var(--ink-soft); margin:10px 0 0;}
+  .path-card .go{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; margin-top:16px; display:inline-block;
+  }
+
+  /* ---------- trust strip ---------- */
+  .strip{
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    display:grid; grid-template-columns:1fr 1fr 1fr;
+  }
+  .strip div{
+    padding:22px 28px; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:13px;
+    color:var(--ink-soft); border-left:1px solid var(--line);
+  }
+  .strip div:first-child{border-left:none;}
+  .strip strong{color:var(--ink); font-size:15px; display:block; margin-bottom:4px; font-family:'Source Serif 4',serif; font-weight:600;}
+
+  /* ---------- case section ---------- */
+  .section{padding:64px 0;}
+  .section-head{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:28px; flex-wrap:wrap; gap:16px;}
+  .section-head h2{font-size:28px;}
+  .filters{display:flex; gap:8px;}
+  .filter-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; padding:7px 14px;
+    border:1px solid var(--line); background:transparent; border-radius:999px;
+    cursor:pointer; color:var(--ink-soft);
+  }
+  .filter-btn.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
+  .grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:18px;}
+  .card{
+    border:1px solid var(--line); background:var(--paper-alt); border-radius:var(--radius);
+    padding:20px; display:flex; flex-direction:column;
+  }
+  .card .tags{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;}
+  .pill{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.04em;
+    padding:3px 8px; border-radius:999px; color:#fff;
+  }
+  .pill.pillar-e{background:var(--e);}
+  .pill.pillar-s{background:var(--s);}
+  .pill.pillar-g{background:var(--g);}
+  .pill.tool{background:transparent; color:var(--ink-soft); border:1px solid var(--line);}
+
+  .card h3{font-size:17px; margin-bottom:8px;}
+  .card p.scenario{font-size:13.5px; color:var(--ink-soft); margin:0 0 14px; flex-grow:1;}
+
+  details{margin-top:auto;}
+  summary{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; cursor:pointer;
+    color:var(--signal); list-style:none; padding:6px 0;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary::before{content:"› "; }
+  details[open] summary::before{content:"⌄ ";}
+
+  .prompt-box{
+    background:var(--code-bg); color:var(--code-text); border-radius:var(--radius);
+    padding:14px; margin-top:10px; position:relative;
+  }
+  .prompt-box .label{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.1em;
+    text-transform:uppercase; color:#9BAE9E; margin-bottom:8px; display:block;
+  }
+  .prompt-box pre{
+    margin:0; white-space:pre-wrap; font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px; line-height:1.65;
+  }
+  .copy-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; background:transparent;
+    color:#9BAE9E; border:1px solid #3A4A3F; border-radius:999px; padding:4px 10px;
+    cursor:pointer; margin-top:10px;
+  }
+  .copy-btn:hover{color:#fff; border-color:#5A6E5E;}
+  .note{font-size:12px; color:var(--ink-soft); margin-top:10px;}
+
+  @media (max-width:860px){
+    .grid{grid-template-columns:1fr;}
+    .paths{grid-template-columns:1fr;}
+    .strip{grid-template-columns:1fr;}
+    .strip div{border-left:none; border-top:1px solid var(--line);}
+    .strip div:first-child{border-top:none;}
+    .hero h1{font-size:32px;}
+  }
+
+  footer{
+    border-top:1px solid var(--line); padding:40px 0; margin-top:20px;
+  }
+  footer .wrap{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;}
+  footer p{font-size:13px; color:var(--ink-soft); margin:0;}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="brand">ESG<b>×</b>AI <span style="color:var(--ink-soft)">Practice Lab</span></div>
+  <nav class="site">
+    <a href="#paths">路径</a>
+    <a href="#cases">案例</a>
+    <a href="#footer">关于</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <section class="hero" id="paths">
+    <span class="eyebrow">ESG × AI 实践实验室</span>
+    <h1>从ESG数据到报告与分析，<br>用AI提示词一步步做出来。</h1>
+    <p class="lede">写给两类人：编制ESG报告、做同业对标、搭指标体系的从业者；以及做ESG投资分析、估值调整、财务影响测算的分析师。这里只有方法和可以直接用的提示词。</p>
+
+    <div class="paths">
+      <a class="path-card supply" href="#cases" onclick="setFilter('supply')">
+        <span class="tag">供给端 · Supply</span>
+        <h3>ESG从业人员</h3>
+        <p>报告编制、经营分析、同业对标、指标体系搭建。用AI把重复性的整理和写作工作提速。</p>
+        <span class="go mono">查看案例 →</span>
+      </a>
+      <a class="path-card demand" href="#cases" onclick="setFilter('demand')">
+        <span class="tag">需求端 · Demand</span>
+        <h3>ESG分析师</h3>
+        <p>投资分析、估值分析、财务影响分析。用AI辅助结构化判断，而不是替代判断。</p>
+        <span class="go mono">查看案例 →</span>
+      </a>
+    </div>
+  </section>
+
+  <div class="strip">
+    <div><strong>6</strong>真实场景案例</div>
+    <div><strong>Excel · PPT · Word</strong>全覆盖工具</div>
+    <div><strong>可直接复制</strong>的提示词模板</div>
+  </div>
+
+  <section class="section" id="cases">
+    <div class="section-head">
+      <h2>案例库</h2>
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">全部</button>
+        <button class="filter-btn" data-filter="supply" onclick="setFilter('supply')">供给端</button>
+        <button class="filter-btn" data-filter="demand" onclick="setFilter('demand')">需求端</button>
+      </div>
+    </div>
+
+    <div class="grid" id="grid">
+
+      <!-- CARD 1 -->
+      <div class="card" data-track="supply">
+        <div class="tags">
+          <span class="pill pillar-e">E/S/G</span>
+          <span class="pill tool">Word</span>
+        </div>
+        <h3>生成ESG报告章节初稿</h3>
+        <p class="scenario">给定上年报告结构和本年度数据要点，让AI产出某一披露章节（如气候风险应对）的初稿，供人工修订。</p>
+        <details>
+          <summary>展开提示词</summary>
+          <div class="prompt-box">
+            <span class="label">Prompt</span>
+            <pre>你是一名ESG报告撰写顾问。基于以下信息，撰写"气候风险应对"章节初稿：
+1. 披露框架：[如ISSB/GRI/国内准则]
+2. 本年度关键数据：[粘贴数据点，如碳排放量、能耗强度同比变化]
+3. 上年度对应章节原文：[粘贴原文，作为行文风格参考]
+4. 要求：
+   - 语言正式、克制，避免营销化表述
+   - 数据引用需与原文一致，不得推测或编造
+   - 结构：现状→本年度举措→下一步计划
+   - 字数控制在[X]字以内
+输出后，请单独列出你使用了哪些数据点，方便我逐一核对。</pre>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(this)">复制提示词</button>
+          <p class="note">要点：让AI在结尾列出引用的数据点，是核对事实性错误最省时的方法。</p>
+        </details>
+      </div>
+
+      <!-- CARD 2 -->
+      <div class="card" data-track="supply">
+        <div class="tags">
+          <span class="pill pillar-g">对标</span>
+          <span class="pill tool">Excel</span>
+        </div>
+        <h3>同业ESG指标对标表</h3>
+        <p class="scenario">把多家同业公开报告中的ESG指标整理成统一口径的对比表，用于内部汇报或指标体系设计参考。</p>
+        <details>
+          <summary>展开提示词</summary>
+          <div class="prompt-box">
+            <span class="label">Prompt</span>
+            <pre>我将提供[N]家同业公司ESG报告中的指标原文片段。请帮我整理成统一格式的对标表：
+
+列：公司名称 | 指标名称 | 原始数值 | 单位 | 统计口径说明 | 数据来源年度
+
+要求：
+- 如果不同公司口径不一致（如是否含范围3排放），在"统计口径说明"列明确标注差异，不要强行统一
+- 无法从原文判断口径的，标注"口径不明"，不要推测
+- 按指标类型分组排序：环境类→社会类→治理类
+
+以下是原文片段：
+[粘贴各公司报告原文片段]</pre>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(this)">复制提示词</button>
+          <p class="note">要点：明确要求AI标注"口径不明"，避免它为了表格好看而悄悄统一口径。</p>
+        </details>
+      </div>
+
+      <!-- CARD 3 -->
+      <div class="card" data-track="supply">
+        <div class="tags">
+          <span class="pill pillar-e">体系</span>
+          <span class="pill tool">PPT</span>
+        </div>
+        <h3>搭建ESG指标体系框架</h3>
+        <p class="scenario">从行业通用框架和公司实际情况出发，让AI辅助梳理一份可用于内部汇报的指标体系树状图大纲。</p>
+        <details>
+          <summary>展开提示词</summary>
+          <div class="prompt-box">
+            <span class="label">Prompt</span>
+            <pre>我需要为[行业]公司设计一套ESG指标体系，用于内部管理和对外披露。
+
+背景：
+- 参考框架：[如GRI/SASB/国内指引，可多选]
+- 公司业务特点：[一两句话描述]
+- 已有指标（如有）：[列出]
+
+请输出：
+1. 三级指标树（一级：E/S/G；二级：主题；三级：具体指标）
+2. 每个三级指标标注：数据来源部门（建议）、更新频率（建议）
+3. 标注哪些指标是"框架要求但公司目前缺失数据"的，单独列出
+
+不要照抄框架原文，要结合我给的公司特点做取舍和归类。</pre>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(this)">复制提示词</button>
+          <p class="note">要点：用于生成大纲/结构，实际数据缺口清单是后续工作分配的重要输出。</p>
+        </details>
+      </div>
+
+      <!-- CARD 4 -->
+      <div class="card" data-track="demand">
+        <div class="tags">
+          <span class="pill pillar-s">财务影响</span>
+          <span class="pill tool">Excel</span>
+        </div>
+        <h3>ESG因素财务影响测算</h3>
+        <p class="scenario">把某项ESG风险或机会（如碳价上涨、供应链合规成本）转化为对财务模型关键假设的调整。</p>
+        <details>
+          <summary>展开提示词</summary>
+          <div class="prompt-box">
+            <span class="label">Prompt</span>
+            <pre>我正在评估[碳价上涨/供应链合规成本/具体ESG事项]对[公司名]财务预测的影响。
+
+已知：
+- 公司当前[相关成本/产量/排放量]数据：[粘贴]
+- 情景假设：[如碳价从X涨到Y，时间跨度Z年]
+
+请帮我：
+1. 列出这个情景会影响利润表/现金流的哪些具体项目（如营业成本、资本开支）
+2. 给出每个受影响项目的测算逻辑（公式形式，不要直接给最终数字）
+3. 标注测算中依赖的关键假设，哪些是"行业普遍假设"，哪些是"需要我自己判断的假设"
+
+目的是让我自己在Excel里搭建这个测算，不是要一个现成结论。</pre>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(this)">复制提示词</button>
+          <p class="note">要点：让AI给逻辑和公式而非直接结论，分析师才能对假设负责、可解释给他人。</p>
+        </details>
+      </div>
+
+      <!-- CARD 5 -->
+      <div class="card" data-track="demand">
+        <div class="tags">
+          <span class="pill pillar-g">估值</span>
+          <span class="pill tool">Excel</span>
+        </div>
+        <h3>ESG因素估值调整辅助判断</h3>
+        <p class="scenario">梳理某个ESG争议事件或趋势，是否、以及如何应该体现在估值模型的折现率或永续增长假设中。</p>
+        <details>
+          <summary>展开提示词</summary>
+          <div class="prompt-box">
+            <span class="label">Prompt</span>
+            <pre>请协助我思考以下ESG事项是否应反映在[公司名]的估值假设中：
+
+事项：[如某项监管处罚/供应链丑闻/碳中和承诺]
+当前估值模型关键假设：[如WACC=X%，永续增长率=Y%]
+
+请分析：
+1. 这类事项在同类案例中，通常通过调整哪个环节反映（折现率/现金流预测/终值假设），并说明理由
+2. 列出支持"应该调整"和"不必调整"的论据，不要只给单一结论
+3. 如果建议调整，给出合理的调整方向和幅度区间的参考逻辑（不是具体数字）
+
+请保持中立分析的语气，最终判断由我来做。</pre>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(this)">复制提示词</button>
+          <p class="note">要点：刻意要求正反论据并列，防止AI给出一个看似自信但未必稳健的单一结论。</p>
+        </details>
+      </div>
+
+      <!-- CARD 6 -->
+      <div class="card" data-track="demand">
+        <div class="tags">
+          <span class="pill pillar-e">投资分析</span>
+          <span class="pill tool">PPT</span>
+        </div>
+        <h3>ESG投资分析要点PPT</h3>
+        <p class="scenario">把一份ESG研究笔记或数据梳理，转化为可以直接汇报用的投资分析要点页面结构。</p>
+        <details>
+          <summary>展开提示词</summary>
+          <div class="prompt-box">
+            <span class="label">Prompt</span>
+            <pre>请把以下ESG分析笔记，整理成一页投资汇报PPT的内容结构（不是完整PPT，是内容大纲）：
+
+笔记内容：
+[粘贴你的分析笔记/要点]
+
+要求：
+1. 标题：一句话结论（判断性语言，如"评级下调驱动因素"）
+2. 三到四个支撑要点，每条不超过20字，要点前用一个动词开头
+3. 单独列出"需要进一步验证的假设"，不要混在结论里
+4. 语言风格：投研内部汇报口吻，克制、不夸张</pre>
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(this)">复制提示词</button>
+          <p class="note">要点：先出内容大纲再排版，比直接让AI"做一个PPT"效果更可控。</p>
+        </details>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<footer id="footer">
+  <div class="wrap">
+    <p>ESG × AI Practice Lab · 方法与案例持续更新中</p>
+    <p class="mono">v0.1 · 上线于本地部署原型</p>
+  </div>
+</footer>
+
+<script>
+function setFilter(track){
+  document.querySelectorAll('.filter-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.filter===track);
+  });
+  document.querySelectorAll('.card').forEach(c=>{
+    const show = track==='all' || c.dataset.track===track;
+    c.style.display = show ? 'flex' : 'none';
+  });
+}
+
+async function copyPrompt(btn){
+  const pre = btn.previousElementSibling.querySelector('pre');
+  try{
+    await navigator.clipboard.writeText(pre.textContent.trim());
+    const original = btn.textContent;
+    btn.textContent = '已复制 ✓';
+    setTimeout(()=>{btn.textContent = original;}, 1600);
+  }catch(e){
+    alert('复制失败，请手动选中文本复制。');
+  }
+}
+</script>
+
+</body>
+</html>
