@@ -1,0 +1,37 @@
+<!doctype html>
+<!-- 此页由 content/$slug.md 生成。 -->
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="Elaine Shen">
+  <meta name="description" content="$description">
+  <title data-en="$english_title · Euphonium">$title · Euphonium</title>
+  <link rel="stylesheet" href="site.css">
+  <meta data-site-policy name="robots" content="noindex, nofollow, nosnippet">
+  <link data-site-policy rel="stylesheet" href="assets/site-policy.css">
+  <script data-site-policy defer src="assets/site-policy.js"></script>
+  <script defer src="assets/language.js"></script>
+</head>
+<body class="home" id="top">
+  <header class="masthead"><div class="wrap masthead-inner">
+    <a class="wordmark" href="index.html"><span aria-hidden="true">E</span>Euphonium</a>
+    <nav aria-label="主导航">
+      <a href="$parent.html" data-en="$back_en">$back_zh</a>
+      <button class="language-switch" type="button" hidden>EN</button>
+    </nav>
+  </div></header>
+  <main>
+    <section class="opening"><div class="wrap">
+      <h1 data-en="$english_title">$title</h1>
+      <p class="lede" data-en="$english_description">$description</p>
+$opening_nav
+    </div></section>
+    <div class="wrap resource-library">
+$library_nav
+$sections
+    </div>
+  </main>
+  <footer><div class="wrap footer-inner"><i>Euphonium</i><span>Elaine Shen</span></div></footer>
+</body>
+</html>
