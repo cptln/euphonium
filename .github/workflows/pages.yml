@@ -11,16 +11,14 @@ concurrency:
   group: euphonium-pages
   cancel-in-progress: false
 jobs:
-  publish:
+  build:
     if: github.event_name != 'release' || startsWith(github.event.release.tag_name, 'site-content-')
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      pages: read
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact_id }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,8 +42,35 @@ jobs:
           test -s _site/studio/manifest.bin
           test -s _site/studio/meta.json
       - uses: actions/upload-pages-artifact@v4
+        id: upload
         with:
           path: _site
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Wait for the uploaded artifact to be visible
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: ${{ needs.build.outputs.artifact_id }}
+        run: |
+          set -euo pipefail
+          for attempt in {1..12}; do
+            if gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?name=github-pages" \
+              --jq '.artifacts[] | select(.expired == false) | .id' | grep -Fxq "$ARTIFACT_ID"; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Pages artifact $ARTIFACT_ID was not visible in run $GITHUB_RUN_ID"
+          exit 1
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
