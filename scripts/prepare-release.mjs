@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildKnowledgeLibrary } from "./build-knowledge-library.mjs";
 import { buildColumns } from "./build-columns.mjs";
+import { removeNotionLinks } from "./remove-notion-links.mjs";
 
 const sourceArgument = process.argv[2];
 if (!sourceArgument) throw new Error("Pass the local Euphonium website directory.");
@@ -54,4 +55,5 @@ for (const name of paths) {
 }
 await buildKnowledgeLibrary(destination, paths);
 if (paths.has("research.html")) await buildColumns(destination, paths);
+await removeNotionLinks(destination, paths);
 console.log(destination);

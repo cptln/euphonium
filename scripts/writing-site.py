@@ -18,6 +18,7 @@ CONTENT = ROOT / "content" / "writing"
 RELEASES = ROOT / "releases"
 BASE = RELEASES / "knowledge-preview"
 RECEIPT = RELEASES / "writing-last-preview.json"
+LINK_FILTER = ROOT / "scripts/remove-notion-links.mjs"
 
 
 def digest(tree):
@@ -136,7 +137,8 @@ def build():
     if not (BASE / "essays.html").is_file():
         raise FileNotFoundError(f"缺少带随笔目录的整站预览：{BASE}")
     inputs = {"content": digest(CONTENT), "base": digest(BASE),
-              "renderer": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+              "renderer": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+              "link_filter": hashlib.sha256(LINK_FILTER.read_bytes()).hexdigest()}
     if RECEIPT.exists():
         old, previous = receipt()
         if previous.is_dir() and old["inputs"] == inputs and digest(previous) == old["digest"]:
@@ -160,6 +162,7 @@ def build():
                         target.parent.mkdir(parents=True, exist_ok=True)
                         shutil.copyfile(image, target)
             render(entry, destination)
+        subprocess.run(["node", str(LINK_FILTER), str(destination)], check=True)
         if any(f.suffix.lower() not in {".html",".js",".css",".txt",".jpg",".jpeg",".png",".webp",".svg",".gif",".ico",".woff",".woff2",".avif",".pdf"}
                for f in destination.rglob("*") if f.is_file()):
             raise ValueError("整站预览包含发布流程不支持的文件")
@@ -177,7 +180,9 @@ def build():
 
 def verified_preview():
     data, folder = receipt()
-    if not folder.is_dir() or digest(folder) != data["digest"] or digest(CONTENT) != data["inputs"]["content"] or digest(BASE) != data["inputs"]["base"]:
+    if (not folder.is_dir() or digest(folder) != data["digest"] or digest(CONTENT) != data["inputs"]["content"]
+            or digest(BASE) != data["inputs"]["base"] or data["inputs"].get("link_filter") != hashlib.sha256(LINK_FILTER.read_bytes()).hexdigest()
+            or data["inputs"]["renderer"] != hashlib.sha256(Path(__file__).read_bytes()).hexdigest()):
         raise ValueError("文章、整站底稿或预览已变化，请重新预览后发布")
     return folder
 
