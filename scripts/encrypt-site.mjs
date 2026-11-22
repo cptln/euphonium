@@ -9,10 +9,23 @@ if (!prepared || !workflow) throw Error("Pass the prepared website directory and
 const releases = fileURLToPath(new URL("../releases/", import.meta.url));
 const output = await mkdtemp(path.join(releases, "pages-"));
 await mkdir(path.join(output, "objects"));
-const replacements = new Map([
-  ["esg/index.html", path.join(workflow, "ESG工作流_人工与AI分工.html")],
-  ["esg/银行年度对标看板.html", path.join(workflow, "银行年度对标看板.html")]
-]);
+const esgPublisher = path.join(workflow, "站点发布");
+const wrapper = (await readFile(path.join(esgPublisher, "解锁页.html"), "utf8")).replaceAll("\r\n", "\n");
+const lockedPages = new Map();
+for (const name of ["esg/index.html", "esg/银行年度对标看板.html"]) {
+  const file = await readFile(path.join(esgPublisher, "public", name));
+  const html = file.toString("utf8").replaceAll("\r\n", "\n");
+  const payload = html.match(/<script type="application\/json" id="encrypted">([^<]+)<\/script>/)?.[1];
+  if (!payload || wrapper.replace("__ENCRYPTED_WORKFLOW__", () => payload) !== html) {
+    throw Error("Expected the ESG publisher's locked page: " + name);
+  }
+  const envelope = JSON.parse(payload);
+  if (envelope.iterations !== 1200000 || Buffer.from(envelope.iv, "base64").length !== 12 ||
+      Buffer.from(envelope.salt, "base64").length !== 16 || Buffer.from(envelope.ciphertext, "base64").length <= 16) {
+    throw Error("Incomplete ESG encryption envelope: " + name);
+  }
+  lockedPages.set(name, file);
+}
 if (process.stdin.isTTY) process.stdin.setRawMode(true);
 console.log("Ready for the login pair on hidden stdin.");
 let line = "";
@@ -38,12 +51,13 @@ async function walk(folder) {
     if (!entry.isFile()) throw Error("Unexpected release entry");
     const name = path.relative(prepared, file).split(path.sep).join("/");
     const id = randomBytes(18).toString("hex");
-    await seal(name, await readFile(replacements.get(name) || file), "objects/" + id + ".bin");
+    if (name.startsWith("esg/") && !lockedPages.has(name)) throw Error("Unreviewed ESG file: " + name);
+    await seal(name, lockedPages.get(name) ?? await readFile(file), "objects/" + id + ".bin");
     manifest[name] = id;
   }
 }
 await walk(prepared);
-for (const name of ["index.html", ...replacements.keys()]) if (!manifest[name]) throw Error("Missing " + name);
+for (const name of ["index.html", ...lockedPages.keys()]) if (!manifest[name]) throw Error("Missing " + name);
 await seal("manifest", Buffer.from(JSON.stringify(manifest)), "manifest.bin");
 await writeFile(path.join(output, "meta.json"), JSON.stringify({salt:salt.toString("base64"), iterations}));
 console.log(output);

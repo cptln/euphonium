@@ -19,6 +19,16 @@ const paths = new Set(candidates.filter(name =>
 ));
 if (!paths.has("index.html") || !paths.has("site.css")) throw new Error("Missing website entry files.");
 
+// This reading copy is excluded from source control and approved for the encrypted site.
+const paper = "articles/critical-equilibrium.html";
+const paperIndex = await readFile(path.join(source, paper), "utf8");
+const reader = paperIndex.match(/data-directory="(pages\/critical-equilibrium)"\s+data-pages="([1-9]\d*)"/);
+if (!reader) throw new Error("Missing critical-equilibrium reader page list.");
+paths.add(paper);
+for (let page = 1; page <= Number(reader[2]); page++) {
+  paths.add("articles/" + reader[1] + "/" + page + ".webp");
+}
+
 await mkdir(releases, { recursive: true });
 const destination = await mkdtemp(path.join(releases, "euphonium-"));
 for (const name of paths) {

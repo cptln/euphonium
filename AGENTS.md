@@ -6,5 +6,5 @@
 2. 在本地构建网站时，Codex 读取本次选定发布的内容和配图。可以通过 Drive 同步，也可以手动导出或替换本地副本。草稿留在资料空间。
 3. Codex 在本地维护导航、模板、样式和构建脚本。内容或结构有改动时，先在本地构建并预览网页。
 4. Git 只跟踪网站架构、构建配置和项目规则。将本地内容目录、文章配图和构建输出加入 `.gitignore`。提交前检查暂存区，确保其中只包含应由 Git 管理的文件。
-5. 在本机整理定稿并加密。ESG 工作流和银行年度对标看板使用「ESG management」中的本地 HTML 原件，一起纳入整站解锁。GitHub Release 保存加密发布包，GitHub Pages 部署网站。仅更新内容时发布新的 `site-content-*` Release 即可。
+5. 在本机整理定稿并加密。ESG 工作流和银行年度对标看板只使用「站点发布/public/esg」中已加密的团队入口，访客登录主页后还须单独通过 ESG 验证。《技术方向转变的临界均衡》和配套阅读页可进入加密发布包。GitHub Release 保存密文，GitHub Pages 部署网站。仅更新内容时发布新的 `site-content-*` Release 即可。
 6. 网站入口为 `https://cptln.github.io/euphonium/studio/`，仓库根网址引导至新版，旧 ESG 书签继续可用。页面、图片和登录均由 GitHub Pages 和访客浏览器完成，无需调用其他托管服务。
