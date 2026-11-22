@@ -30,8 +30,34 @@ const {publisherKey, username, password, verifyOnly} = JSON.parse(input);
 const options = {redirect:"manual"};
 const encodePath = name => name.split("/").map(encodeURIComponent).join("/");
 const checksum = data => createHash("sha256").update(data).digest("hex");
+function matchesRelease(name, local, remote) {
+  if (checksum(remote) === checksum(local)) return true;
+  if (!name.endsWith(".html")) return false;
+  // The hosting edge can insert its browser check immediately before </body>.
+  // Compare every original byte, and allow only that single identified script.
+  const closing = local.lastIndexOf(Buffer.from("</body>"));
+  const extra = remote.length - local.length;
+  if (closing < 0 || extra < 1 || extra > 4096 ||
+      !remote.subarray(0, closing).equals(local.subarray(0, closing)) ||
+      !remote.subarray(closing + extra).equals(local.subarray(closing))) return false;
+  const script = remote.subarray(closing, closing + extra).toString("utf8");
+  return /^<script>(?:(?!<\/script>)[\s\S])*<\/script>$/.test(script) &&
+    script.includes("window.__CF$cv$params=") && script.includes("/cdn-cgi/challenge-platform/");
+}
 async function check(response, status, operation) {
   if (response.status !== status) throw new Error(operation + " returned " + response.status);
+}
+async function readLive(url, cookie) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const response = await fetch(url, {...options, headers:{Cookie:cookie}, signal:AbortSignal.timeout(45000)});
+      await check(response, 200, "Verify " + new URL(url).pathname);
+      return Buffer.from(await response.arrayBuffer());
+    } catch (error) {
+      if (attempt >= 4) throw error;
+      await new Promise(resolve => setTimeout(resolve, 800 * (attempt + 1)));
+    }
+  }
 }
 async function parallel(fn) {
   const queue = paths.values();
@@ -76,13 +102,11 @@ if (!verifyOnly) {
   console.log("Activated the complete release.");
 }
 await parallel(async name => {
-  const remote = await fetch(origin + "/" + encodePath(name), {...options, headers:{Cookie:cookie}});
-  await check(remote, 200, "Verify " + name);
-  if (checksum(Buffer.from(await remote.arrayBuffer())) !== checksum(await readFile(path.join(directory, name)))) {
+  const remote = await readLive(origin + "/" + encodePath(name), cookie);
+  if (!matchesRelease(name, await readFile(path.join(directory, name)), remote)) {
     throw new Error("Content mismatch: " + name);
   }
 });
-const home = await fetch(origin + "/", {...options, headers:{Cookie:cookie}});
-await check(home, 200, "Authenticated homepage");
-if (checksum(Buffer.from(await home.arrayBuffer())) !== checksum(await readFile(path.join(directory, "index.html")))) throw new Error("Homepage mismatch");
-console.log("Verified homepage and " + paths.length + " authenticated files by SHA-256.");
+const home = await readLive(origin + "/", cookie);
+if (!matchesRelease("index.html", await readFile(path.join(directory, "index.html")), home)) throw new Error("Homepage mismatch");
+console.log("Verified homepage and " + paths.length + " authenticated files against the local release.");
