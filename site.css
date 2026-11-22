@@ -120,6 +120,23 @@ article hr { border: 0; border-top: 1px solid var(--rule); margin: 2rem 0; }
 .summary-note { color: var(--teal); font-size: .95rem; }
 
 .essay-card > .essay-meta { margin-top: 0; }
+#essays .project-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+#essays .project-grid + .project-grid { margin-top: 20px; }
+.essay-card > .essay-tag {
+  align-self: flex-start;
+  margin-top: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #e8f1ef;
+  color: var(--teal);
+  font-size: .82rem;
+}
+@media (max-width: 850px) {
+  #essays .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  #essays .project-grid { grid-template-columns: 1fr; }
+}
 .essay-card .essay-meta, .essay-card .essay-meta span { color: var(--slate); font-size: .9rem; font-weight: 400; }
 .essay-card h3 { margin-top: .4rem; }
 .essay-text > header { margin-bottom: 2rem; padding-block: 1rem 1.4rem; border-bottom: 1px solid var(--rule); }
@@ -233,3 +250,27 @@ html[lang="en"] .tool-name { display: none; }
 .insight-columns .note-grid { grid-template-columns: minmax(0, 1fr); }
 @media (max-width: 560px) { .note-grid { grid-template-columns: 1fr; } }
 @media (max-width: 700px) { .insight-columns { grid-template-columns: 1fr; } }
+.essay-series { padding: 16px 20px; gap: 8px; }
+.essay-series h3 { font-size: 1.12rem; }
+.essay-series-meta { display: flex; gap: 14px; align-items: baseline; }
+.essay-series-meta span { font-size: .88rem; }
+.essay-series-meta span:first-child { color: var(--slate); font-weight: 400; }
+.essay-directory .library-nav { margin-top: 22px; }
+.essay-directory .band { padding-block: 36px; }
+.essay-directory .band + .band { border-top: 1px solid var(--rule); }
+.essay-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.essay-tags .essay-tag {
+  margin: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e8f1ef;
+  color: var(--teal);
+  font-size: .8rem;
+  font-weight: 500;
+}
+.essay-text .essay-tags { margin-block: 8px 16px; }
+.essay-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.essay-section-heading a { color: var(--teal); font-weight: 600; font-size: .94rem; }
+.essay-series-links { list-style: none; padding: 0; margin: 0; width: 100%; }
+.essay-series-links li + li { border-top: 1px solid var(--rule); }
+.essay-series-links a { display: block; padding-block: 5px; color: var(--teal); }

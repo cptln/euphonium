@@ -2,6 +2,8 @@ import { execFileSync } from "node:child_process";
 import { mkdir, mkdtemp, readFile, realpath, copyFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildKnowledgeLibrary } from "./build-knowledge-library.mjs";
+import { buildColumns } from "./build-columns.mjs";
 
 const sourceArgument = process.argv[2];
 if (!sourceArgument) throw new Error("Pass the local Euphonium website directory.");
@@ -50,4 +52,6 @@ for (const name of paths) {
     await copyFile(from, to);
   }
 }
+await buildKnowledgeLibrary(destination, paths);
+if (paths.has("research.html")) await buildColumns(destination, paths);
 console.log(destination);

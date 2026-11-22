@@ -3,3 +3,5 @@
 /encrypted-site.tar.gz
 /.env
 /.env.*
+
+/content/writing/

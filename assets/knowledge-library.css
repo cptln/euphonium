@@ -1,0 +1,35 @@
+.knowledge-banner {
+  background-color: #273950;
+  background-image: linear-gradient(115deg, #223149, #28565b);
+  color: #fff;
+}
+.knowledge-banner .lede { color: #e0eeef; }
+.knowledge-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  border-bottom: 1px solid var(--rule);
+  margin-top: 24px;
+}
+.knowledge-tabs a {
+  padding: 12px 8px;
+  border-bottom: 3px solid transparent;
+  color: var(--slate);
+  text-align: center;
+  text-decoration: none;
+}
+.knowledge-tabs a:hover { background: #ecf3f1; }
+.knowledge-tabs a[aria-selected="true"] {
+  border-color: var(--teal);
+  background: #ecf3f1;
+  color: var(--ink);
+  font-weight: 600;
+}
+.knowledge-panel { padding-block: 16px 40px; scroll-margin-top: 75px; }
+.knowledge-panel .library-nav { margin-top: 20px; }
+.knowledge-panel .library-nav + .band { padding-top: 40px; }
+.knowledge-project { color: var(--teal); }
+@media (max-width: 640px) {
+  .knowledge-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.knowledge-panel:focus { outline: none; }
