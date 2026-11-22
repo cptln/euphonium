@@ -1,0 +1,5 @@
+/releases/
+/dist/
+/encrypted-site.tar.gz
+/.env
+/.env.*

@@ -1,0 +1,51 @@
+name: Publish Euphonium
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  release:
+    types: [published]
+permissions:
+  contents: read
+concurrency:
+  group: euphonium-pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name != 'release' || startsWith(github.event.release.tag_name, 'site-content-')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/configure-pages@v5
+      - name: Assemble the site with the latest encrypted release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag=$(gh release list --limit 100 --exclude-drafts --json tagName --jq '[.[] | select(.tagName | startswith("site-content-"))][0].tagName')
+          test -n "$tag"
+          gh release download "$tag" --pattern encrypted-site.tar.gz --dir "$RUNNER_TEMP"
+          mkdir -p _site/studio
+          cp index.html _site/
+          cp -R esg _site/esg
+          cp studio/index.html studio/login.js studio/sw.js _site/studio/
+          cp studio/index.html _site/studio/shell.html
+          cp studio/index.html _site/404.html
+          tar -xzf "$RUNNER_TEMP/encrypted-site.tar.gz" -C _site/studio
+          test -s _site/studio/manifest.bin
+          test -s _site/studio/meta.json
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
