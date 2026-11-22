@@ -1,3 +1,4 @@
 /releases/
+/dist/
 /.env
 /.env.*
