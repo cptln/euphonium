@@ -29,7 +29,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          tag=$(gh release list --limit 100 --exclude-drafts --json tagName --jq '[.[] | select(.tagName | startswith("site-content-"))][0].tagName')
+          tag=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" |
+            jq -rs '[.[][] | select(.draft == false and (.tag_name | startswith("site-content-")))] | max_by(.published_at, .id) | .tag_name // empty')
           test -n "$tag"
           gh release download "$tag" --pattern encrypted-site.tar.gz --dir "$RUNNER_TEMP"
           mkdir -p _site/studio
