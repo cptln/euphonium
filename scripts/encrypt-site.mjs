@@ -12,11 +12,14 @@ await mkdir(path.join(output, "objects"));
 const esgPublisher = path.join(workflow, "站点发布");
 const wrapper = (await readFile(path.join(esgPublisher, "解锁页.html"), "utf8")).replaceAll("\r\n", "\n");
 const lockedPages = new Map();
-for (const name of ["esg/index.html", "esg/银行年度对标看板.html"]) {
+for (const name of ["esg/index.html", "esg/银行年度对标看板.html", "esg/carbon.html"]) {
   const file = await readFile(path.join(esgPublisher, "public", name));
   const html = file.toString("utf8").replaceAll("\r\n", "\n");
   const payload = html.match(/<script type="application\/json" id="encrypted">([^<]+)<\/script>/)?.[1];
-  if (!payload || wrapper.replace("__ENCRYPTED_WORKFLOW__", () => payload) !== html) {
+  const template = name === "esg/carbon.html" ? wrapper
+    .replaceAll("ESG 工作流", "碳排放测算工作流")
+    .replace("项目时间线和年度对标看板", "碳排放计算工作指南") : wrapper;
+  if (!payload || template.replace("__ENCRYPTED_WORKFLOW__", () => payload) !== html) {
     throw Error("Expected the ESG publisher's locked page: " + name);
   }
   const envelope = JSON.parse(payload);

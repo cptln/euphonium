@@ -25,7 +25,13 @@
   }
 
   function followHash() {
-    const target = document.getElementById(location.hash.slice(1));
+    const fragment = location.hash.slice(1);
+    let target = document.getElementById(fragment);
+    if (!target && fragment.startsWith("climate-action-")) {
+      const section = fragment.slice("climate-action-".length);
+      target = document.getElementById(section === "nature-biodiversity" ? section : "nature-biodiversity-" + section);
+      if (target) history.replaceState(null, "", "#" + target.id);
+    }
     const index = panels.findIndex(panel => panel.contains(target));
     select(index < 0 ? 0 : index);
     if (index >= 0 && panels[index] !== target) target.scrollIntoView();
